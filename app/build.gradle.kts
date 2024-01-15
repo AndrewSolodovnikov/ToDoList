@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.sol.todolist"
-    compileSdk = 33
+    compileSdk = 34
 
     defaultConfig {
         applicationId = "com.sol.todolist"
