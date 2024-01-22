@@ -3,9 +3,7 @@ package com.sol.todolist
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
 import android.widget.TextView
-import androidx.appcompat.view.menu.MenuView.ItemView
 import androidx.recyclerview.widget.RecyclerView
 
 class CustomAdapter(private val mList: MutableList<ToDoItem>): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
@@ -32,8 +30,9 @@ class CustomAdapter(private val mList: MutableList<ToDoItem>): RecyclerView.Adap
         holder.number.text = mList[position].number.toString()
     }
 
-    fun addItems(item: ToDoItem){
+    fun addItem(item: ToDoItem){
         mList.add(item)
         notifyDataSetChanged()
     }
+
 }

@@ -1,39 +1,124 @@
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
-import android.view.Window
+import android.view.Gravity
+import android.view.View
+import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
-import android.widget.TextView
-import android.widget.Toast
+import com.sol.todolist.MainActivity
 import com.sol.todolist.R
+import com.sol.todolist.ToDoItem
 
-class CustomDialog(context: Context, private val onConfirmClick: (String) -> Unit) : Dialog(context) {
+class CustomDialog(private var activity: MainActivity) :
+    Dialog(activity), View.OnClickListener {
 
+    private lateinit var okButton: Button
+    private lateinit var cancelButton: Button
+
+    private lateinit var inputFieldTitle : EditText
+    private lateinit var inputFieldDescription : EditText
+    private lateinit var inputFieldNumber : EditText
+
+    /*
     private lateinit var editText: EditText
+    private lateinit var titleTextView: TextView
+    private lateinit var btnConfirm: Button
+    private lateinit var btnCancel: Button
+
+     */
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        requestWindowFeature(Window.FEATURE_NO_TITLE)
-        setContentView(R.layout.custom_dialog)
+        //requestWindowFeature(Window.FEATURE_NO_TITLE)
+        setContentView(R.layout.dialog_template)
+        inputFieldTitle = findViewById(R.id.dialog_input_title)
 
-        val titleTextView: TextView = findViewById(R.id.dialogTitle)
-        titleTextView.text = "Add new task"
+        initView()
 
+        dialogSizeControl()
+    }
+
+    /*
+    private fun btnClick() {
+        btnCancel.setOnClickListener(this)
+        btnConfirm.setOnClickListener(this)
+    }
+
+     */
+
+    private fun dialogSizeControl() {
+        val lp = WindowManager.LayoutParams()
+        lp.copyFrom(this.window?.attributes)
+        lp.width = WindowManager.LayoutParams.MATCH_PARENT
+        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
+        lp.gravity = Gravity.CENTER
+        this.window?.attributes = lp
+    }
+
+    override fun onClick(view: View?) {
+        when (view?.id) {
+            R.id.dialog_ok_button -> {
+                okButtonClicker()
+            }
+            R.id.dialog_cancel_button -> {
+                cancelButtonClicked()
+            }
+            else -> {
+                elseBeenClicked()
+            }
+        }
+    }
+
+    private fun initView() {
+        okButton = findViewById<Button>(R.id.dialog_ok_button)
+        cancelButton = findViewById<Button>(R.id.dialog_cancel_button)
+        okButton.setOnClickListener(this)
+        cancelButton.setOnClickListener(this)
+        inputFieldTitle = findViewById(R.id.dialog_input_title)
+        inputFieldDescription = findViewById(R.id.dialog_input_description)
+        inputFieldNumber = findViewById(R.id.dialog_input_number)
+
+        /*
         editText = findViewById(R.id.editText)
+        titleTextView = findViewById(R.id.dialogTitle)
+        btnConfirm = findViewById(R.id.btnConfirm)
+        btnCancel = findViewById(R.id.btnCancel)
 
-        val btnConfirm: Button = findViewById(R.id.btnConfirm)
-        btnConfirm.setOnClickListener {
-            val enteredText = editText.text.toString()
-            Toast.makeText(context, "Work add", Toast.LENGTH_LONG).show()
-            onConfirmClick.invoke(enteredText)
-            dismiss()
-        }
+         */
+    }
 
-        val btnCancel: Button = findViewById(R.id.btnCancel)
-        btnCancel.setOnClickListener {
-            Toast.makeText(context, "You clicked cancel", Toast.LENGTH_LONG).show()
-            dismiss()
-        }
+    /*
+    private fun btnConfirmAction() {
+        val enteredText = editText.text.toString()
+        Toast.makeText(context, "Work add", Toast.LENGTH_LONG).show()
+
+        // Вызов метода addItem для добавления нового элемента в список
+        adapter.addItems(enteredText)
+        dismiss()
+    }
+
+    private fun btnCancelAction() {
+        Toast.makeText(context, "You clicked cancel", Toast.LENGTH_LONG).show()
+        dismiss()
+    }
+     */
+
+    private fun elseBeenClicked() {
+
+    }
+
+    private fun cancelButtonClicked() {
+        dismiss()
+    }
+
+    private fun okButtonClicker() {
+        val inputTitleResult = inputFieldTitle.text.toString()
+        val inputDescriptionResult = inputFieldDescription.text.toString()
+        val inputNumberResult = inputFieldNumber.text.toString().toInt()
+
+        activity.addItem(ToDoItem
+            (inputTitleResult, inputDescriptionResult, inputNumberResult))
+        dismiss()
     }
 }
