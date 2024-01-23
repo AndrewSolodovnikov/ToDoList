@@ -5,6 +5,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
+import com.sol.todolist.ItemAddListener
 import com.sol.todolist.MainActivity
 import com.sol.todolist.R
 import com.sol.todolist.ToDoItem
@@ -19,18 +20,11 @@ class CustomDialog(private var activity: MainActivity) :
     private lateinit var inputFieldDescription : EditText
     private lateinit var inputFieldNumber : EditText
 
-    /*
-    private lateinit var editText: EditText
-    private lateinit var titleTextView: TextView
-    private lateinit var btnConfirm: Button
-    private lateinit var btnCancel: Button
-
-     */
+    private lateinit var itemAddListener: ItemAddListener // Интерфейс для передачи данных в MainActivity
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //requestWindowFeature(Window.FEATURE_NO_TITLE)
         setContentView(R.layout.dialog_template)
         inputFieldTitle = findViewById(R.id.dialog_input_title)
 
@@ -38,14 +32,6 @@ class CustomDialog(private var activity: MainActivity) :
 
         dialogSizeControl()
     }
-
-    /*
-    private fun btnClick() {
-        btnCancel.setOnClickListener(this)
-        btnConfirm.setOnClickListener(this)
-    }
-
-     */
 
     private fun dialogSizeControl() {
         val lp = WindowManager.LayoutParams()
@@ -78,31 +64,7 @@ class CustomDialog(private var activity: MainActivity) :
         inputFieldTitle = findViewById(R.id.dialog_input_title)
         inputFieldDescription = findViewById(R.id.dialog_input_description)
         inputFieldNumber = findViewById(R.id.dialog_input_number)
-
-        /*
-        editText = findViewById(R.id.editText)
-        titleTextView = findViewById(R.id.dialogTitle)
-        btnConfirm = findViewById(R.id.btnConfirm)
-        btnCancel = findViewById(R.id.btnCancel)
-
-         */
     }
-
-    /*
-    private fun btnConfirmAction() {
-        val enteredText = editText.text.toString()
-        Toast.makeText(context, "Work add", Toast.LENGTH_LONG).show()
-
-        // Вызов метода addItem для добавления нового элемента в список
-        adapter.addItems(enteredText)
-        dismiss()
-    }
-
-    private fun btnCancelAction() {
-        Toast.makeText(context, "You clicked cancel", Toast.LENGTH_LONG).show()
-        dismiss()
-    }
-     */
 
     private fun elseBeenClicked() {
 
@@ -117,8 +79,13 @@ class CustomDialog(private var activity: MainActivity) :
         val inputDescriptionResult = inputFieldDescription.text.toString()
         val inputNumberResult = inputFieldNumber.text.toString().toInt()
 
-        activity.addItem(ToDoItem
+        itemAddListener.addItem(ToDoItem
             (inputTitleResult, inputDescriptionResult, inputNumberResult))
         dismiss()
+    }
+
+    // Метод для передачи интерфейса в диалог
+    fun setItemAddListener(listener: ItemAddListener) {
+        itemAddListener = listener
     }
 }

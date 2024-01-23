@@ -3,8 +3,6 @@ package com.sol.todolist
 import CustomDialog
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
-import android.view.View
 import android.view.View.INVISIBLE
 import android.view.View.VISIBLE
 import android.widget.LinearLayout
@@ -12,7 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), ItemAddListener {
     private lateinit var stubContainer: LinearLayout
     private lateinit var fab: FloatingActionButton
     private lateinit var recyclerview: RecyclerView
@@ -29,6 +27,7 @@ class MainActivity : AppCompatActivity() {
 
         fab.setOnClickListener {
             val dialog = CustomDialog(this)
+            dialog.setItemAddListener(this)
             dialog.show()
         }
 
@@ -58,7 +57,7 @@ class MainActivity : AppCompatActivity() {
         recyclerview.adapter = adapter
     }
 
-    fun addItem(item: ToDoItem) {
+    override fun addItem(item: ToDoItem) {
         adapter.addItem(item)
     }
 }
