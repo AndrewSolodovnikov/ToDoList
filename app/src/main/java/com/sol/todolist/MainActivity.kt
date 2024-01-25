@@ -58,6 +58,8 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
     }
 
     override fun addItem(item: ToDoItem) {
+        stubContainer.visibility = INVISIBLE
+        recyclerview.visibility = VISIBLE
         adapter.addItem(item)
     }
 }
