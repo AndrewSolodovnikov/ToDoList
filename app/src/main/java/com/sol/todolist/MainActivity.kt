@@ -63,3 +63,7 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
         adapter.addItem(item)
     }
 }
+
+/* PC test
+
+ */
