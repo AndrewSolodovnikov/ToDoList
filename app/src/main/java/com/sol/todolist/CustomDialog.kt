@@ -80,7 +80,7 @@ class CustomDialog(private var activity: MainActivity) :
         val inputNumberResult = inputFieldNumber.text.toString().toInt()
 
         itemAddListener.addItem(ToDoItem
-            (inputTitleResult, inputDescriptionResult, inputNumberResult))
+            (0, inputTitleResult, inputDescriptionResult, inputNumberResult))
         dismiss()
     }
 

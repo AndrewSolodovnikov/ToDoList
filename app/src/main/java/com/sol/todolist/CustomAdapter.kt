@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomAdapter(private val mList: MutableList<ToDoItem>): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
+class CustomAdapter(private var mList: MutableList<ToDoItem>): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val title: TextView = itemView.findViewById(R.id.item_recycler_title)
         val descrption: TextView = itemView.findViewById(R.id.item_recycler_description)
@@ -30,13 +30,9 @@ class CustomAdapter(private val mList: MutableList<ToDoItem>): RecyclerView.Adap
         holder.number.text = mList[position].number.toString()
     }
 
-    fun addItem(item: ToDoItem){
-        mList.add(item)
+    fun updateList(updateList: List<ToDoItem>){
+        mList = updateList.toMutableList()
         notifyDataSetChanged()
     }
 
 }
-
-/* PC test
-
- */
