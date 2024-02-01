@@ -4,10 +4,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 
-class CustomAdapter(private var mList: MutableList<ToDoItem>): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
+class CustomAdapter(private var mList: MutableList<ToDoItem>, private val click: OnItemClick): RecyclerView.Adapter<CustomAdapter.ViewHolder>() {
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val container: ConstraintLayout = itemView.findViewById(R.id.item_recycler_container)
         val title: TextView = itemView.findViewById(R.id.item_recycler_title)
         val descrption: TextView = itemView.findViewById(R.id.item_recycler_description)
         val number: TextView = itemView.findViewById(R.id.item_recycler_number)
@@ -28,6 +30,9 @@ class CustomAdapter(private var mList: MutableList<ToDoItem>): RecyclerView.Adap
         holder.title.text = mList[position].title
         holder.descrption.text = mList[position].description
         holder.number.text = mList[position].number.toString()
+        holder.container.setOnClickListener {
+            click.itemClicked(mList[position])
+        }
     }
 
     fun updateList(updateList: List<ToDoItem>){

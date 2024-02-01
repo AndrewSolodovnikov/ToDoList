@@ -15,7 +15,7 @@ import androidx.room.Room
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.sol.todolist.room.AppDatabase
 
-class MainActivity : AppCompatActivity(), ItemAddListener {
+class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
     private lateinit var stubContainer: LinearLayout
     private lateinit var fab: FloatingActionButton
     private lateinit var recyclerview: RecyclerView
@@ -33,8 +33,8 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
         fab = findViewById(R.id.main_fab)
 
         fab.setOnClickListener {
-            val dialog = CustomDialog(this)
-            dialog.setItemAddListener(this)
+            val dialog = CustomDialog(this, true, null)
+            //dialog.setItemAddListener(this)
             dialog.show()
         }
 
@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
         recyclerview.layoutManager = LinearLayoutManager(this)
 
         // This will pass the ArrayList to our Adapter
-        adapter = CustomAdapter(mutableListOf()) // Initialize the adapter
+        adapter = CustomAdapter(mutableListOf(), this) // Initialize the adapter
         // Setting the Adapter with the recyclerview
         recyclerview.adapter = adapter
 
@@ -57,13 +57,7 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
         todoLiveData.observe(this, Observer {
             adapter.updateList(it)
 
-            if (it.isEmpty()) {
-                stubContainer.visibility = VISIBLE
-                recyclerview.visibility = INVISIBLE
-            } else {
-                stubContainer.visibility = INVISIBLE
-                recyclerview.visibility = VISIBLE
-            }
+            screenDataValidation(it)
 
             Log.d("roomcheck", "-> $it")
         })
@@ -72,9 +66,32 @@ class MainActivity : AppCompatActivity(), ItemAddListener {
         //val todo: List<ToDoItem> = todoDao.getAllItems()
     }
 
+    private fun screenDataValidation(toDoItems: List<ToDoItem>) {
+        if (toDoItems.isEmpty()) {
+            stubContainer.visibility = VISIBLE
+            recyclerview.visibility = INVISIBLE
+        } else {
+            stubContainer.visibility = INVISIBLE
+            recyclerview.visibility = VISIBLE
+        }
+    }
+
     override fun addItem(item: ToDoItem) {
         stubContainer.visibility = INVISIBLE
         recyclerview.visibility = VISIBLE
         db.todoDao().insertItem(item)
+    }
+
+    override fun updateItem(item: ToDoItem) {
+        db.todoDao().updateItem(item)
+    }
+
+    override fun itemClicked(item: ToDoItem) {
+            val dialog = CustomDialog(this, false, item)
+            //dialog.setItemAddListener(this)
+            dialog.show()
+
+        Log.d("ItemClicked", "item: $item")
+
     }
 }
