@@ -1,5 +1,7 @@
 import android.app.Dialog
+import android.content.Context
 import android.os.Bundle
+import android.provider.Settings.Global.getString
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -11,8 +13,10 @@ import com.sol.todolist.ItemAddListener
 import com.sol.todolist.MainActivity
 import com.sol.todolist.R
 import com.sol.todolist.ToDoItem
+import com.sol.todolist.WhatItemEnum
 
-class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, private var item: ToDoItem?) :
+class CustomDialog(private var activity: MainActivity,
+                   private var whatItem: WhatItemEnum, private var item: ToDoItem?) :
     Dialog(activity), View.OnClickListener {
 
     private lateinit var okButton: Button
@@ -23,7 +27,7 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
     private lateinit var inputFieldDescription : EditText
     private lateinit var inputFieldNumber : EditText
 
-    private lateinit var itemAddListener: ItemAddListener // Интерфейс для передачи данных в MainActivity
+    //private lateinit var itemAddListener: ItemAddListener // Интерфейс для передачи данных в MainActivity
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,8 +38,7 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
         initView()
         dialogSizeControl()
 
-        if (!isNewItem) {
-            Log.d("Open dialog update", "updateExistingItem")
+        if (whatItem == WhatItemEnum.ITEM) {
             updateExistingItem()
         }
     }
@@ -82,6 +85,7 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
         inputFieldDescription = findViewById(R.id.dialog_input_description)
         inputFieldNumber = findViewById(R.id.dialog_input_number)
         dialogLabel = findViewById(R.id.dialogLabel)
+
     }
 
     private fun elseBeenClicked() {
@@ -93,19 +97,20 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
     }
 
     private fun okButtonClicker() {
-        if (isNewItem) {
-            okNewItemBeenClicked()
-        } else {
-            okUpdateItemBeenClicked()
+        when (whatItem) {
+            WhatItemEnum.FAB_BUTTON -> {
+                okNewItemBeenClicked()
+            } WhatItemEnum.ITEM -> {
+                okUpdateItemBeenClicked()
+            }
         }
 
     }
 
     private fun okNewItemBeenClicked() {
-        if (isNewItem) {
+        if (whatItem == WhatItemEnum.FAB_BUTTON) {
             createNewItem()
         } else {
-            Log.d("okUpdateee", "update item: $item")
             okUpdateItemBeenClicked()
         }
     }
@@ -115,8 +120,6 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
         val inputDescriptionResult = inputFieldDescription.text.toString()
         val inputNumberResult = inputFieldNumber.text.toString().toInt()
 
-        Log.d("okUpdateItemBeenClickedUpdateee", "update item: $item")
-        //itemAddListener
         activity.updateItem(ToDoItem
             (item?.id, inputTitleResult, inputDescriptionResult, inputNumberResult))
 
@@ -125,6 +128,15 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
     }
 
     private fun createNewItem() {
+        /*
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        val titleFromPrefs = sharedPref.getString("titleKey", "")
+        val descriptionFromPrefs = sharedPref.getString("descriptionKey", "")
+        inputFieldTitle.setText(titleFromPrefs)
+        inputFieldDescription.setText(descriptionFromPrefs)
+        Log.d("prefstesting", "createNewItem sharePref $titleFromPrefs | $descriptionFromPrefs been applied")
+        */
+
         val inputTitleResult = inputFieldTitle.text.toString()
         val inputDescriptionResult = inputFieldDescription.text.toString()
         val inputNumberResult = inputFieldNumber.text.toString().toInt()
@@ -133,12 +145,42 @@ class CustomDialog(private var activity: MainActivity, var isNewItem: Boolean, p
         activity.addItem(ToDoItem
             (null, inputTitleResult, inputDescriptionResult, inputNumberResult))
         dismiss()
-        Log.d("createNewItemClickeddd", "createNewItem")
-
     }
 
-    // Метод для передачи интерфейса в диалог
-    fun setItemAddListener(listener: ItemAddListener) {
-        itemAddListener = listener
+    override fun onStart() {
+        super.onStart()
+        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+        val titleFromPrefs = sharedPref.getString("TitleKey", "")
+        val descriptionFromPrefs = sharedPref.getString("DescriptionKey", "")
+        val numberFromPrefs = sharedPref.getString("NumberKey", "")
+        inputFieldTitle.setText(titleFromPrefs)
+        inputFieldDescription.setText(descriptionFromPrefs)
+        inputFieldNumber.setText(numberFromPrefs)
+        Log.d("prefstesting", "onStart sharePref been called")
     }
+
+    override fun onStop() {
+        super.onStop()
+        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+        Log.d("prefstesting", "onStop been called")
+
+        val inputTitleResult = inputFieldTitle.text.toString()
+        val inputDescriptionResult = inputFieldDescription.text.toString()
+        val inputNumberResult = inputFieldNumber.text.toString()
+
+        with (sharedPref.edit()) {
+            putString("TitleKey", inputTitleResult)
+            putString("DescriptionKey", inputDescriptionResult)
+            putString("NumberKey", inputNumberResult)
+            /*
+            if (inputNumberResult.isNotEmpty()) {
+                inputTitleResult.toInt()
+                putInt("NumberKey", inputNumberResult)
+            }
+
+             */
+            apply()
+            Log.d("prefstesting", "sharePref been applied")
+        }
 }
+    }
