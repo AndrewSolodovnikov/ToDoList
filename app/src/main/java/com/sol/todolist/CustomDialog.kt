@@ -128,15 +128,6 @@ class CustomDialog(private var activity: MainActivity,
     }
 
     private fun createNewItem() {
-        /*
-        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-        val titleFromPrefs = sharedPref.getString("titleKey", "")
-        val descriptionFromPrefs = sharedPref.getString("descriptionKey", "")
-        inputFieldTitle.setText(titleFromPrefs)
-        inputFieldDescription.setText(descriptionFromPrefs)
-        Log.d("prefstesting", "createNewItem sharePref $titleFromPrefs | $descriptionFromPrefs been applied")
-        */
-
         val inputTitleResult = inputFieldTitle.text.toString()
         val inputDescriptionResult = inputFieldDescription.text.toString()
         val inputNumberResult = inputFieldNumber.text.toString().toInt()
@@ -149,38 +140,35 @@ class CustomDialog(private var activity: MainActivity,
 
     override fun onStart() {
         super.onStart()
-        val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-        val titleFromPrefs = sharedPref.getString("TitleKey", "")
-        val descriptionFromPrefs = sharedPref.getString("DescriptionKey", "")
-        val numberFromPrefs = sharedPref.getString("NumberKey", "")
-        inputFieldTitle.setText(titleFromPrefs)
-        inputFieldDescription.setText(descriptionFromPrefs)
-        inputFieldNumber.setText(numberFromPrefs)
-        Log.d("prefstesting", "onStart sharePref been called")
+        if (whatItem == WhatItemEnum.FAB_BUTTON) {
+            val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+            val titleFromPrefs = sharedPref.getString("TitleKey", "")
+            val descriptionFromPrefs = sharedPref.getString("DescriptionKey", "")
+            val numberFromPrefs = sharedPref.getString("NumberKey", "")
+            inputFieldTitle.setText(titleFromPrefs)
+            inputFieldDescription.setText(descriptionFromPrefs)
+            inputFieldNumber.setText(numberFromPrefs)
+            Log.d("prefstesting", "onStart sharePref been called")
+        }
     }
 
     override fun onStop() {
         super.onStop()
-        val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
-        Log.d("prefstesting", "onStop been called")
+        if (whatItem == WhatItemEnum.FAB_BUTTON) {
+            val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
+            Log.d("prefstesting", "onStop been called")
 
-        val inputTitleResult = inputFieldTitle.text.toString()
-        val inputDescriptionResult = inputFieldDescription.text.toString()
-        val inputNumberResult = inputFieldNumber.text.toString()
+            val inputTitleResult = inputFieldTitle.text.toString()
+            val inputDescriptionResult = inputFieldDescription.text.toString()
+            val inputNumberResult = inputFieldNumber.text.toString()
 
-        with (sharedPref.edit()) {
-            putString("TitleKey", inputTitleResult)
-            putString("DescriptionKey", inputDescriptionResult)
-            putString("NumberKey", inputNumberResult)
-            /*
-            if (inputNumberResult.isNotEmpty()) {
-                inputTitleResult.toInt()
-                putInt("NumberKey", inputNumberResult)
+            with(sharedPref.edit()) {
+                putString("TitleKey", inputTitleResult)
+                putString("DescriptionKey", inputDescriptionResult)
+                putString("NumberKey", inputNumberResult)
+                apply()
+                Log.d("prefstesting", "sharePref been applied")
             }
-
-             */
-            apply()
-            Log.d("prefstesting", "sharePref been applied")
         }
 }
     }
