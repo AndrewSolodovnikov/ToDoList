@@ -135,6 +135,12 @@ class CustomDialog(private var activity: MainActivity,
         //itemAddListener
         activity.addItem(ToDoItem
             (null, inputTitleResult, inputDescriptionResult, inputNumberResult))
+
+        Log.d("prefstesting", "clean prefs")
+        inputFieldTitle.text.clear()
+        inputFieldDescription.text.clear()
+        inputFieldNumber.text.clear()
+
         dismiss()
     }
 

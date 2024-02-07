@@ -124,6 +124,8 @@ class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
                             // below line is to notify item is
                             // added to our adapter class.
                             adapter.notifyItemInserted(position)
+
+                            db.todoDao().insertItem(delItem)
                         }).show()
                 deleteItem(delItem)
             }
