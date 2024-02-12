@@ -1,15 +1,18 @@
-import android.app.Dialog
+import android.app.ActionBar
 import android.content.Context
 import android.os.Bundle
-import android.provider.Settings.Global.getString
 import android.util.Log
-import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
-import com.sol.todolist.ItemAddListener
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Observer
+import com.sol.todolist.CustomDialogViewModel
 import com.sol.todolist.MainActivity
 import com.sol.todolist.R
 import com.sol.todolist.ToDoItem
@@ -17,7 +20,9 @@ import com.sol.todolist.WhatItemEnum
 
 class CustomDialog(private var activity: MainActivity,
                    private var whatItem: WhatItemEnum, private var item: ToDoItem?) :
-    Dialog(activity), View.OnClickListener {
+    DialogFragment(), View.OnClickListener {
+
+    private val mCustomDialogViewModel: CustomDialogViewModel by activityViewModels()
 
     private lateinit var okButton: Button
     private lateinit var cancelButton: Button
@@ -29,18 +34,27 @@ class CustomDialog(private var activity: MainActivity,
 
     //private lateinit var itemAddListener: ItemAddListener // Интерфейс для передачи данных в MainActivity
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        //return super.onCreateView(inflater, container, savedInstanceState)
+        val view: View = inflater.inflate(R.layout.dialog_template, container, false)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        setContentView(R.layout.dialog_template)
-        inputFieldTitle = findViewById(R.id.dialog_input_title)
-
-        initView()
+        initView(view)
         dialogSizeControl()
 
         if (whatItem == WhatItemEnum.ITEM) {
             updateExistingItem()
         }
+
+        return view
+    }
+
+    override fun onResume() {
+        super.onResume()
+        dialogSizeControl()
     }
 
     private fun updateExistingItem() {
@@ -54,12 +68,10 @@ class CustomDialog(private var activity: MainActivity,
     }
 
     private fun dialogSizeControl() {
-        val lp = WindowManager.LayoutParams()
-        lp.copyFrom(this.window?.attributes)
-        lp.width = WindowManager.LayoutParams.MATCH_PARENT
-        lp.height = WindowManager.LayoutParams.WRAP_CONTENT
-        lp.gravity = Gravity.CENTER
-        this.window?.attributes = lp
+        val params: ViewGroup.LayoutParams = dialog!!.window!!.attributes
+        params.width = ActionBar.LayoutParams.WRAP_CONTENT
+        params.height = ActionBar.LayoutParams.WRAP_CONTENT
+        dialog!!.window!!.attributes = params as WindowManager.LayoutParams
     }
 
     override fun onClick(view: View?) {
@@ -76,15 +88,16 @@ class CustomDialog(private var activity: MainActivity,
         }
     }
 
-    private fun initView() {
-        okButton = findViewById<Button>(R.id.dialog_ok_button)
-        cancelButton = findViewById<Button>(R.id.dialog_cancel_button)
+    private fun initView(view: View) {
+        inputFieldTitle = view.findViewById(R.id.dialog_input_title)
+        okButton = view.findViewById<Button>(R.id.dialog_ok_button)
+        cancelButton = view.findViewById<Button>(R.id.dialog_cancel_button)
         okButton.setOnClickListener(this)
         cancelButton.setOnClickListener(this)
-        inputFieldTitle = findViewById(R.id.dialog_input_title)
-        inputFieldDescription = findViewById(R.id.dialog_input_description)
-        inputFieldNumber = findViewById(R.id.dialog_input_number)
-        dialogLabel = findViewById(R.id.dialogLabel)
+        inputFieldTitle = view.findViewById(R.id.dialog_input_title)
+        inputFieldDescription = view.findViewById(R.id.dialog_input_description)
+        inputFieldNumber = view.findViewById(R.id.dialog_input_number)
+        dialogLabel = view.findViewById(R.id.dialogLabel)
 
     }
 
@@ -146,35 +159,59 @@ class CustomDialog(private var activity: MainActivity,
 
     override fun onStart() {
         super.onStart()
+        mCustomDialogViewModel.getTodoItemFromPrefs()
+
+        //TODO НЕ ПЕРЕНОСИТСЯ В ONRESUME 54 МИН УРОК 5 MVVM
         if (whatItem == WhatItemEnum.FAB_BUTTON) {
-            val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
-            val titleFromPrefs = sharedPref.getString("TitleKey", "")
-            val descriptionFromPrefs = sharedPref.getString("DescriptionKey", "")
-            val numberFromPrefs = sharedPref.getString("NumberKey", "")
+            mCustomDialogViewModel.todoItemListResult.observe(this, Observer {
+                inputFieldTitle.setText(it.title)
+                inputFieldDescription.setText(it.description)
+                inputFieldNumber.setText(it.number)
+                Log.d("roomcheck", "-> $it")
+            })
+
+            /*
+            //val sharedPref = activity.getPreferences(Context.MODE_PRIVATE)
+            val titleFromPrefs = mCustomDialogViewModel.getTodoItemFromPrefs("TitleKey")
+            val descriptionFromPrefs = mCustomDialogViewModel.getTodoItemFromPrefs("DescriptionKey")
+            val numberFromPrefs = mCustomDialogViewModel.getTodoItemFromPrefs("NumberKey")
             inputFieldTitle.setText(titleFromPrefs)
             inputFieldDescription.setText(descriptionFromPrefs)
             inputFieldNumber.setText(numberFromPrefs)
             Log.d("prefstesting", "onStart sharePref been called")
+
+             */
         }
     }
 
     override fun onStop() {
         super.onStop()
         if (whatItem == WhatItemEnum.FAB_BUTTON) {
+            val inputTitleResult = inputFieldTitle.text.toString()
+            val inputDescriptionResult = inputFieldDescription.text.toString()
+            val inputNumberResult = inputFieldNumber.text.toString().toInt()
+
+            mCustomDialogViewModel.saveDataInPrefs("titleKey", inputTitleResult)
+            mCustomDialogViewModel.saveDataInPrefs("descriptionKey", inputDescriptionResult)
+            mCustomDialogViewModel.saveDataInPrefs("numberKey", inputNumberResult)
+
+            /*
             val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE) ?: return
             Log.d("prefstesting", "onStop been called")
 
             val inputTitleResult = inputFieldTitle.text.toString()
             val inputDescriptionResult = inputFieldDescription.text.toString()
-            val inputNumberResult = inputFieldNumber.text.toString()
+            val inputNumberResult = inputFieldNumber.text.toString().toInt()
 
             with(sharedPref.edit()) {
                 putString("TitleKey", inputTitleResult)
                 putString("DescriptionKey", inputDescriptionResult)
-                putString("NumberKey", inputNumberResult)
+                putInt("NumberKey", inputNumberResult)
                 apply()
                 Log.d("prefstesting", "sharePref been applied")
             }
+             */
+
         }
 }
     }

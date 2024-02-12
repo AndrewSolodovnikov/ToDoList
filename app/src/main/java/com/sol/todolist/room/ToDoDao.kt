@@ -11,7 +11,7 @@ import com.sol.todolist.ToDoItem
 @Dao
 interface ToDoDao {
     @Query("SELECT * FROM ToDoItem")
-    fun getAllItems(): LiveData<List<ToDoItem>>
+    fun getAllItems(): List<ToDoItem>
 
     @Insert
     fun insertItem(toDoItem: ToDoItem)

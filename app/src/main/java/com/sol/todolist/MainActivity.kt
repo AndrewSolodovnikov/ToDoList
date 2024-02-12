@@ -18,6 +18,7 @@ import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -25,13 +26,17 @@ import androidx.room.Room
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.snackbar.Snackbar
 import com.sol.todolist.room.AppDatabase
+import androidx.activity.viewModels
+import androidx.fragment.app.DialogFragment
 
 class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
+
+    private val mMainViewModel: MainViewModel by viewModels()
+
     private lateinit var stubContainer: LinearLayout
     private lateinit var fab: FloatingActionButton
     private lateinit var recyclerview: RecyclerView
     private lateinit var adapter: CustomAdapter // Declare adapter as a member variable
-    private lateinit var db: AppDatabase
     private lateinit var todoLiveData: LiveData<List<ToDoItem>>
     private lateinit var data: List<ToDoItem>
 
@@ -52,9 +57,10 @@ class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
         fab = findViewById(R.id.main_fab)
 
         fab.setOnClickListener {
-            val dialog = CustomDialog(this, WhatItemEnum.FAB_BUTTON, null)
+            val dialogFragment = CustomDialog(this, WhatItemEnum.FAB_BUTTON, null)
             //dialog.setItemAddListener(this)
-            dialog.show()
+            //dialog.show()
+            dialogFragment.show(supportFragmentManager, "Custom Dialog")
         }
 
         // this creates a vertical layout Manager
@@ -65,15 +71,9 @@ class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
         // Setting the Adapter with the recyclerview
         recyclerview.adapter = adapter
 
-        //Room
-        db = Room.databaseBuilder(
-            applicationContext, AppDatabase::class.java, "database-name")
-            .allowMainThreadQueries()
-            .build()
-
-        todoLiveData = db.todoDao().getAllItems()
-
-        todoLiveData.observe(this, Observer {
+        // TODO GET ALL DATA QUERY
+        mMainViewModel.getAllItems()
+        mMainViewModel.todoItemListResult.observe(this, Observer {
             adapter.updateList(it)
             data = it
 
@@ -125,7 +125,8 @@ class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
                             // added to our adapter class.
                             adapter.notifyItemInserted(position)
 
-                            db.todoDao().insertItem(delItem)
+                            //TODO
+                            //db.todoDao().insertItem(delItem)
                         }).show()
                 deleteItem(delItem)
             }
@@ -183,23 +184,31 @@ class MainActivity : AppCompatActivity(), ItemAddListener, OnItemClick {
     override fun addItem(item: ToDoItem) {
         stubContainer.visibility = INVISIBLE
         recyclerview.visibility = VISIBLE
-        db.todoDao().insertItem(item)
+        mMainViewModel.insertItem(item)
+        //TODO INSERT IN ROOM ITEM
+        //db.todoDao().insertItem(item)
     }
 
     override fun updateItem(item: ToDoItem) {
-        db.todoDao().updateItem(item)
+        mMainViewModel.updateItem(item)
+        //TODO UPDATE IN ROOM ITEM
+        //db.todoDao().updateItem(item)
     }
 
     override fun itemClicked(item: ToDoItem) {
-            val dialog = CustomDialog(this, WhatItemEnum.ITEM, item)
+            val dialogFragment = CustomDialog(this, WhatItemEnum.ITEM, item)
             //dialog.setItemAddListener(this)
-            dialog.show()
+            //dialog.show()
+            dialogFragment.show(supportFragmentManager, "Custom Dialog")
+
 
         Log.d("ItemClicked", "item: $item")
     }
 
     override fun deleteItem(item: ToDoItem) {
-        db.todoDao().deleteItem(item)
+        //TODO DELETE IN ROOM ITEM
+        mMainViewModel.deleteItem(item)
+        //db.todoDao().deleteItem(item)
     }
 
 }
